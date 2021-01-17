@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    ul,
+    li {
+      list-style: none;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+      /* Chrome Safari */
+    }
+
+    .wrapper {
+      position: relative;
+      width: 100%;
+      overflow-y: hidden;
+      overflow-x: scroll;
+    }
+
+    .list {
+      display: flex;
+      flex-wrap: nowrap;
+    }
+
+    .item {
+      text-align: center;
+      line-height: 36px;
+      padding: 0 12px;
+      white-space: nowrap;
+    }
+
+    .line {
+      position: absolute;
+      text-align: center;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      transform: translate3d(0, 0, 0);
+      transition: transform 0.3s ease-out;
+      display: none;
+    }
+
+    .inner {
+      width: 20px;
+      height: 2px;
+      background: red;
+      display: inline-block;
+      vertical-align: bottom;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper" id="wrapper">
+    <ul class="list" id="list">
+      <li class="item" data-index="0">标题1</li>
+      <li class="item" data-index="1">标题2</li>
+      <li class="item" data-index="2">标题3</li>
+      <li class="item" data-index="3">标题4</li>
+      <li class="item" data-index="4">标题5</li>
+      <li class="item" data-index="5">标题6</li>
+      <li class="item" data-index="6">标题7</li>
+      <li class="item" data-index="7">标题8</li>
+      <li class="item" data-index="8">标题9</li>
+      <li class="item" data-index="9">标题10</li>
+      <li class="item" data-index="10">标题11</li>
+    </ul>
+    <div class="line" id="line">
+      <span class="inner"></span>
+    </div>
+  </div>
+  <script>
+    const list = document.getElementsByClassName('item')
+    const line = document.getElementById('line')
+    const listWrapper = document.getElementById('list')
+    const wrapper = document.getElementById('wrapper')
+    const resut = []
+    let allWidth = 0
+    for (let i = 0; i < list.length; i++) {
+      const element = list[i]
+      allWidth += element.offsetWidth
+      resut.push({
+        width: element.offsetWidth,
+        left: element.offsetLeft
+      })
+    }
+    line.style.width = `${resut[0].width}px`
+    line.style.display = 'block'
+    let current = 0
+    let timer = null
+
+    listWrapper.onclick = function (e) {
+      // 快速点击需要立即停止动画
+      clearInterval(timer)
+      const index = e.target.dataset.index
+      const width = resut[index].width
+      line.style.width = `${width}px`
+      const left = resut[index].left
+      line.style.transform = `translate3d(${left}px, 0, 0)`
+      list[current].style.color = ''
+      list[index].style.color = 'red'
+      current = index
+    }
+
+    line.addEventListener('transitionend', function () {
+      const elementLeft = Math.floor(list[current].getBoundingClientRect().left)
+      const scrollLeft = wrapper.scrollLeft
+      const middle = Math.floor(window.innerWidth / 2) - Math.floor(resut[current].width / 2)
+      const minScroll = 0
+      const maxScroll = allWidth - window.innerWidth
+      let targetScrollLeft = scrollLeft + (elementLeft - middle)
+      if (targetScrollLeft < minScroll) {
+        targetScrollLeft = minScroll
+      }
+      if (targetScrollLeft > maxScroll) {
+        targetScrollLeft = maxScroll
+      }
+      if (allWidth > window.innerWidth && scrollLeft !== targetScrollLeft) {
+        animationScroll(targetScrollLeft)
+      }
+    }, false)
+
+    function animationScroll(distance) {
+      const minScroll = 0
+      const maxScroll = allWidth - window.innerWidth
+      const scrollLeft = wrapper.scrollLeft
+      const step = Math.floor(Math.abs((scrollLeft - distance) / 200 * 20))
+      let temp = 0
+      timer = setInterval(() => {
+        // 手动触发的滚动需要立即停止动画
+        if (temp && wrapper.scrollLeft !== temp) {
+          return clearInterval(timer)
+        }
+        if (distance > scrollLeft) {
+          const current = wrapper.scrollLeft + step
+          // 左移动
+          if (current > distance || current >= maxScroll) {
+            clearInterval(timer)
+            wrapper.scrollLeft = distance
+          } else {
+            wrapper.scrollLeft = current
+            temp = current
+          }
+        } else {
+          const current = wrapper.scrollLeft - step
+          // 右移动
+          if (current < distance || current <= minScroll) {
+            clearInterval(timer)
+            wrapper.scrollLeft = distance
+          } else {
+            wrapper.scrollLeft = current
+            temp = current
+          }
+        }
+      }, 20);
+    }
+
+  </script>
+</body>
+
+</html>
