@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+</head>
+
+<body>
+  <button id="btn">+</button>
+  <script>
+    console.log('hello')
+    var t = Date.now()
+    let timer = setInterval(function () {
+      console.log(Date.now() - t);
+      t = Date.now()
+    }, 100);
+
+    let btn = document.getElementById('btn')
+    btn.onclick = function () {
+      long()
+      clearInterval(timer)
+    }
+
+    function long() {
+      var result = 0
+      for (var i = 0; i < 1000; i++) {
+        for (var j = 0; j < 1000; j++) {
+          for (var k = 0; k < 1000; k++) {
+            result = result + i + j + k
+          }
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
